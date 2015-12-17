@@ -33,18 +33,20 @@ exports.handleRequest = function (req, res) {
         urlRequest += chunk;
       });
       req.on('end', function(){
-        urlRequest = urlRequest.slice(4);
-        archive.addUrlToList(urlRequest+'\n', function(){
-          console.log("Done!");
-        });
-        
-        urlRequest = archive.paths.archivedSites+'/'+urlRequest;
-        
-        archive.isUrlArchived((urlRequest), function(exists){
+        urlRequest = urlRequest.slice(5);
+        console.log(urlRequest);
+        urlFilepath = archive.paths.archivedSites+'/'+urlRequest;
+        archive.isUrlArchived((urlFilepath), function(exists){
           if(exists){
-            sendRes(res, 302, urlRequest);
+            sendRes(res, 302, urlFilepath);
           } else {
             sendRes(res, 201, archive.paths.siteAssets+'/loading.html');
+            archive.addUrlToList(urlRequest+'\n', function(){
+              console.log("Done!");
+            });
+            archive.readListOfUrls(function(list){
+              archive.downloadUrls(list);
+            });
           }
         });
       });
