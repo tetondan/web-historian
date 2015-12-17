@@ -1,6 +1,7 @@
 var path = require('path');
 var archive = require('../helpers/archive-helpers');
 var httpHelpers = require('./http-helpers');
+var httpGet = require('../workers/htmlfetcher')
 // require more modules/folders here!
 var sendRes = function(res,code, path){
   res.writeHead(code, httpHelpers.headers);
@@ -34,18 +35,14 @@ exports.handleRequest = function (req, res) {
       });
       req.on('end', function(){
         urlRequest = urlRequest.slice(5);
-        console.log(urlRequest);
         urlFilepath = archive.paths.archivedSites+'/'+urlRequest;
         archive.isUrlArchived((urlFilepath), function(exists){
           if(exists){
             sendRes(res, 302, urlFilepath);
           } else {
+            httpGet.httpGetter();
             sendRes(res, 201, archive.paths.siteAssets+'/loading.html');
             archive.addUrlToList(urlRequest+'\n', function(){
-              console.log("Done!");
-            });
-            archive.readListOfUrls(function(list){
-              archive.downloadUrls(list);
             });
           }
         });

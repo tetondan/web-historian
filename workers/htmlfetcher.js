@@ -1,26 +1,18 @@
 // Use the code in `archive-helpers.js` to actually download the urls
 // that are waiting.
 var archive = require('../helpers/archive-helpers');
-var http = require('http');
+var _ = require('underscore');
 
 
-
-
-
-
-
-exports.httpGetter = function(url, callback){
-  return http.get({
-          host: url,
-          path: '/'
-      }, function(response) {
-          var body = '';
-          response.on('data', function(d) {
-              body += d;
-          });
-          response.on('end', function() {
-              // var parsed = JSON.parse(body);
-              callback(body);
-          });
+exports.httpGetter = function(){
+  archive.readListOfUrls(function(array){
+    _.each(array, function(item){
+      var newUrl = archive.paths.archivedSites+'/'+item
+      archive.isUrlArchived(item, function(exists){
+        if(!exists && item !== ''){
+          archive.downloadUrls(item, newUrl);
+        }
       });
-}
+    });
+  });
+};
