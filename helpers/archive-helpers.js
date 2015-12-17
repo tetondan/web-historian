@@ -25,22 +25,27 @@ exports.initialize = function(pathsObj) {
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function(path, callback) {
+exports.readListOfUrls = function(callback) {
+  var path = exports.paths.list
   fs.readFile(path, 'utf8', function(err, data){
     if (err) throw err;
-    data = data.split('\n');
-    return data;
+    results = data.split('\n');
+    callback(results);
+  });
+};
+
+exports.isUrlInList = function(url, callback) {  
+  exports.readListOfUrls(function(array){
+    callback(_.contains(array, url));
   });
 
 };
 
-exports.isUrlInList = function(path,url) {
-
-};
-
-exports.addUrlToList = function(path, url,callback) {
+exports.addUrlToList = function(url, callback) {
+  var path = exports.paths.list;
   fs.appendFile(path, url, encoding='utf8', function (err) {
     if (err) throw err;
+    callback();
   });
 };
 
@@ -49,5 +54,16 @@ exports.isUrlArchived = function(path,callback) {
     callback(exists);
   });
 };
-exports.downloadUrls = function() {
+
+exports.downloadUrls = function(urlArray) {
+  _.each(urlArray, function(eachItem){
+    exports.isUrlArchived(exports.paths.archivedSites+'/'+eachItem, function(exists){
+      if(!exists){
+          fs.mkdir(exports.paths.archivedSites+'/'+eachItem, function(err){
+          if(err) throw err;
+        });
+      }
+    });
+  });
 };
+

@@ -33,9 +33,10 @@ exports.handleRequest = function (req, res) {
         urlRequest += chunk;
       });
       req.on('end', function(){
-        archive.readListOfUrls(archive.paths.list);
         urlRequest = urlRequest.slice(4);
-        archive.addUrlToList(archive.paths.list, urlRequest+'\n');
+        archive.addUrlToList(urlRequest+'\n', function(){
+          console.log("Done!");
+        });
         
         urlRequest = archive.paths.archivedSites+'/'+urlRequest;
         
